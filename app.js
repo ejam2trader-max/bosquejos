@@ -53,7 +53,7 @@ btnProcess.addEventListener('click', () => {
     btnProcess.innerText = "CONSULTANDO A GEMINI PRO...";
 
     // TU URL DE GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTqHdc94RgVg800GOGFbWIskugICEXCh-D1MxJWGIdE5xK3Do1J0qyaR7oY8Z9nAyp0g/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfWHdDToKHustJUsC3qvZcGnhBtwsntFahD_bBcV9iH40ZAMMB4HWAWtwd6GBDxho_yA/exec";
     
     const callbackName = 'callback_' + Math.round(Math.random() * 1000000);
 
