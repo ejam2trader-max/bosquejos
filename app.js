@@ -1,4 +1,5 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbw7F3cyAkBOVx60t42VgHmvkGaDf2XgVXq426y7BRyv-z3mGh_kdd-66sCrlpwlv6oMOw/exec"; // <--- PEGA TU URL DE PASO 1
+// URL ACTUALIZADA
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxisggKJdrZGtfJREuV5Jo3pXQtd4JjKOAURrUM17aQVEb8kOnq7N4eYGSaKXVc5H2cww/exec";
 
 const video = document.getElementById('video');
 const preview = document.getElementById('preview');
@@ -14,10 +15,10 @@ async function activarCamara() {
         preview.classList.add('hidden');
         document.getElementById('cam-status').classList.add('hidden');
         video.play();
-    } catch (err) { alert("Error: Acceso a cámara denegado."); }
+    } catch (err) { alert("Error: Acceso a cámara denegado. Asegúrate de usar HTTPS."); }
 }
 
-// 2. Leer desde Archivo
+// 2. Leer desde Archivo (Galería)
 function leerArchivo(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -35,18 +36,22 @@ function leerArchivo(e) {
 // 3. OCR (Imagen a Texto)
 async function ejecutarOCR(src) {
     btnRun.innerText = "LEYENDO IMAGEN...";
-    const { data: { text } } = await Tesseract.recognize(src, 'spa');
-    bibleText.value = text.trim();
-    btnRun.innerText = "GENERAR BOSQUEJO";
+    try {
+        const { data: { text } } = await Tesseract.recognize(src, 'spa');
+        bibleText.value = text.trim();
+        btnRun.innerText = "GENERAR BOSQUEJO";
+    } catch (err) { 
+        btnRun.innerText = "ERROR AL LEER";
+    }
 }
 
-// 4. Conexión JSONP con Google
+// 4. Conexión JSONP (Evita errores de conexión)
 function procesar() {
     const texto = bibleText.value.trim();
-    if (texto.length < 5) return alert("Ingresa un texto válido.");
+    if (texto.length < 5) return alert("Por favor, ingresa o captura un texto bíblico.");
 
     btnRun.disabled = true;
-    btnRun.innerText = "GEMINI PENSANDO...";
+    btnRun.innerText = "CONECTANDO CON EL TRONO DE GRACIA...";
 
     const callbackName = 'cb_' + Date.now();
     window[callbackName] = function(data) {
@@ -56,15 +61,29 @@ function procesar() {
         document.getElementById('c-slides').innerHTML = data.slides.map(s => 
             `<div class="bg-indigo-900 text-white p-6 rounded-2xl text-center font-serif shadow-md border-b-4 border-indigo-400">${s}</div>`
         ).join('');
+        
         btnRun.disabled = false;
         btnRun.innerText = "GENERAR OTRO";
+        
+        // Limpieza de etiquetas temporales
         delete window[callbackName];
-        document.getElementById('temp-script').remove();
+        const s = document.getElementById('temp-script');
+        if(s) s.remove();
+        
+        // Desplazamiento automático al resultado
+        document.getElementById('results').scrollIntoView({behavior: 'smooth'});
     };
 
     const script = document.createElement('script');
     script.id = 'temp-script';
     script.src = `${URL_SCRIPT}?text=${encodeURIComponent(texto)}&callback=${callbackName}`;
+    
+    script.onerror = () => {
+        alert("Error de conexión. Revisa que el Script de Google esté publicado para 'Cualquiera'.");
+        btnRun.disabled = false;
+        btnRun.innerText = "REINTENTAR";
+    };
+
     document.body.appendChild(script);
 }
 
