@@ -11,49 +11,53 @@
         .active-tab { border-bottom: 4px solid #6366f1; color: #6366f1; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        #video { transform: scaleX(1); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
     <header class="bg-indigo-700 text-white p-6 shadow-md text-center">
-        <h1 class="text-2xl font-bold tracking-tight">GRACE SCANNER PRO</h1>
-        <p class="text-xs opacity-90 uppercase tracking-widest">Enfoque en el Nuevo Pacto</p>
+        <h1 class="text-2xl font-bold tracking-tight uppercase">Grace Scanner Pro</h1>
+        <p class="text-[10px] opacity-80 tracking-[0.2em]">TEOLOGÍA DEL NUEVO PACTO</p>
     </header>
 
     <main class="max-w-md mx-auto p-4 pb-20">
-        <div class="bg-white rounded-2xl shadow-sm p-3 mb-4 border border-slate-200">
-            <div id="camera-container" class="relative overflow-hidden rounded-xl bg-black aspect-video flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-sm p-4 mb-4 border border-slate-200">
+            <div id="preview-box" class="relative overflow-hidden rounded-xl bg-black aspect-video flex items-center justify-center mb-4">
                 <video id="video" class="w-full hidden" autoplay playsinline muted></video>
                 <img id="image-preview" class="w-full hidden object-contain">
-                <canvas id="canvas" class="hidden"></canvas>
-                <div id="placeholder" class="text-center p-4">
-                    <p class="text-sm text-slate-400">Sin cámara activa</p>
-                </div>
+                <div id="placeholder" class="text-slate-500 text-xs">Cámara inactiva</div>
             </div>
             
-            <div class="grid grid-cols-2 gap-2 mt-4">
-                <button id="btn-camera" class="bg-indigo-600 text-white p-3 rounded-xl font-bold text-sm">USAR CÁMARA</button>
-                <button id="btn-upload" class="bg-slate-800 text-white p-3 rounded-xl font-bold text-sm">SUBIR FOTO</button>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button id="btn-camera" class="bg-indigo-600 text-white p-3 rounded-xl font-bold text-xs uppercase">Cámara</button>
+                <button id="btn-upload" class="bg-slate-800 text-white p-3 rounded-xl font-bold text-xs uppercase">Galería</button>
                 <input type="file" id="file-input" accept="image/*" class="hidden">
             </div>
+
+            <label class="text-[10px] font-bold text-slate-400 uppercase px-1">Texto Bíblico</label>
+            <textarea id="bible-text-input" rows="3" 
+                class="w-full p-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                placeholder="Escribe aquí o usa la cámara..."></textarea>
             
-            <button id="btn-process" class="hidden mt-2 bg-emerald-600 text-white w-full py-4 rounded-xl font-bold shadow-lg">PROCESAR TEXTO</button>
+            <button id="btn-process" class="mt-4 bg-emerald-600 text-white w-full py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">
+                GENERAR BOSQUEJO DE GRACIA
+            </button>
         </div>
 
         <div id="results-area" class="hidden">
-            <div class="flex justify-between border-b mb-4 bg-white rounded-t-lg">
-                <button onclick="switchTab('completo')" id="tab-completo" class="tab-btn p-3 flex-1 active-tab font-bold text-xs">COMPLETO</button>
-                <button onclick="switchTab('minimal')" id="tab-minimal" class="tab-btn p-3 flex-1 font-bold text-xs text-slate-500">MINIMAL</button>
-                <button onclick="switchTab('slides')" id="tab-slides" class="tab-btn p-3 flex-1 font-bold text-xs text-slate-500">SLIDES</button>
+            <div class="flex justify-between border-b mb-4 bg-white rounded-t-xl overflow-hidden shadow-sm">
+                <button onclick="switchTab('completo')" id="tab-completo" class="tab-btn p-3 flex-1 active-tab font-bold text-[10px]">COMPLETO</button>
+                <button onclick="switchTab('minimal')" id="tab-minimal" class="tab-btn p-3 flex-1 font-bold text-[10px] text-slate-400">MINIMAL</button>
+                <button onclick="switchTab('slides')" id="tab-slides" class="tab-btn p-3 flex-1 font-bold text-[10px] text-slate-400">SLIDES</button>
             </div>
 
-            <div id="completo" class="tab-content active bg-white p-5 rounded-b-xl shadow-sm prose prose-slate max-w-none border-x border-b border-slate-200"></div>
-            <div id="minimal" class="tab-content bg-white p-5 rounded-b-xl shadow-sm italic text-lg border-l-4 border-indigo-500 border-r border-b border-slate-200"></div>
+            <div id="completo" class="tab-content active bg-white p-5 rounded-b-xl shadow-sm prose prose-slate border border-slate-200 border-t-0"></div>
+            <div id="minimal" class="tab-content bg-white p-5 rounded-b-xl shadow-sm italic text-lg border-l-4 border-indigo-500 border border-slate-200 border-t-0 border-l-4"></div>
             <div id="slides" class="tab-content space-y-3"></div>
         </div>
     </main>
 
+    <canvas id="hidden-canvas" class="hidden"></canvas>
     <script src="app.js"></script>
 </body>
 </html>
