@@ -1,5 +1,5 @@
 // URL ACTUALIZADA
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxisggKJdrZGtfJREuV5Jo3pXQtd4JjKOAURrUM17aQVEb8kOnq7N4eYGSaKXVc5H2cww/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsGn03qxJJZU6_Jt_soTAr3Um5ygbtlzjx7KbGj4iqFnURkhEH9tBNBPOmGRRX2N42w/exec";
 
 const video = document.getElementById('video');
 const preview = document.getElementById('preview');
