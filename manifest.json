@@ -1,7 +1,7 @@
 {
   "name": "Grace Scanner Pro",
-  "short_name": "Grace",
-  "start_url": ".",
+  "short_name": "GraceApp",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#4338ca",
   "theme_color": "#4338ca",
