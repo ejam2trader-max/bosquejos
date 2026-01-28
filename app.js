@@ -1,4 +1,4 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwkYFBom2csCvbvDhZjdaPPBG89qR7aEUb8Nmls6NbyDpuNXzhHTZCujlU0GWL7xhhgOQ/exec"; // <--- PEGA TU URL DE PASO 1
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbw7F3cyAkBOVx60t42VgHmvkGaDf2XgVXq426y7BRyv-z3mGh_kdd-66sCrlpwlv6oMOw/exec"; // <--- PEGA TU URL DE PASO 1
 
 const video = document.getElementById('video');
 const preview = document.getElementById('preview');
