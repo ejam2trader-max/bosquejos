@@ -1,90 +1,77 @@
-const video = document.getElementById('video');
-const imagePreview = document.getElementById('image-preview');
-const fileInput = document.getElementById('file-input');
-const btnCamera = document.getElementById('btn-camera');
-const btnUpload = document.getElementById('btn-upload');
-const btnProcess = document.getElementById('btn-process');
-const bibleInput = document.getElementById('bible-text-input');
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwkYFBom2csCvbvDhZjdaPPBG89qR7aEUb8Nmls6NbyDpuNXzhHTZCujlU0GWL7xhhgOQ/exec"; // <--- PEGA TU URL DE PASO 1
 
-// 1. Manejo de Cámara y Archivos
-btnCamera.addEventListener('click', async () => {
+const video = document.getElementById('video');
+const preview = document.getElementById('preview');
+const bibleText = document.getElementById('bible-text');
+const btnRun = document.getElementById('btn-run');
+
+// 1. Activar Cámara
+async function activarCamara() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         video.srcObject = stream;
         video.classList.remove('hidden');
-        imagePreview.classList.add('hidden');
+        preview.classList.add('hidden');
+        document.getElementById('cam-status').classList.add('hidden');
         video.play();
-        btnProcess.classList.remove('hidden');
-    } catch (err) { alert("Acceso a cámara denegado. Asegúrate de estar en HTTPS."); }
-});
-
-btnUpload.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ex) => {
-            imagePreview.src = ex.target.result;
-            imagePreview.classList.remove('hidden');
-            video.classList.add('hidden');
-            btnProcess.classList.remove('hidden');
-            ejecutarOCR(ex.target.result);
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// 2. OCR (Reconocimiento de Texto)
-async function ejecutarOCR(source) {
-    btnProcess.innerText = "LEYENDO IMAGEN...";
-    try {
-        const { data: { text } } = await Tesseract.recognize(source, 'spa');
-        bibleInput.value = text.trim();
-        btnProcess.innerText = "GENERAR BOSQUEJO DE GRACIA";
-    } catch (err) { alert("Error al leer la imagen."); }
+    } catch (err) { alert("Error: Acceso a cámara denegado."); }
 }
 
-// 3. Envío al Servidor (MÉTODO JSONP - SIN ERRORES DE CORS)
-btnProcess.addEventListener('click', () => {
-    const texto = bibleInput.value.trim();
-    if (texto.length < 5) return alert("Por favor, ingresa o captura un texto bíblico.");
+// 2. Leer desde Archivo
+function leerArchivo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        preview.src = ev.target.result;
+        preview.classList.remove('hidden');
+        video.classList.add('hidden');
+        document.getElementById('cam-status').classList.add('hidden');
+        ejecutarOCR(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+}
 
-    btnProcess.disabled = true;
-    btnProcess.innerText = "CONSULTANDO A GEMINI PRO...";
+// 3. OCR (Imagen a Texto)
+async function ejecutarOCR(src) {
+    btnRun.innerText = "LEYENDO IMAGEN...";
+    const { data: { text } } = await Tesseract.recognize(src, 'spa');
+    bibleText.value = text.trim();
+    btnRun.innerText = "GENERAR BOSQUEJO";
+}
 
-    // TU URL DE GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfWHdDToKHustJUsC3qvZcGnhBtwsntFahD_bBcV9iH40ZAMMB4HWAWtwd6GBDxho_yA/exec";
-    
-    const callbackName = 'callback_' + Math.round(Math.random() * 1000000);
+// 4. Conexión JSONP con Google
+function procesar() {
+    const texto = bibleText.value.trim();
+    if (texto.length < 5) return alert("Ingresa un texto válido.");
 
+    btnRun.disabled = true;
+    btnRun.innerText = "GEMINI PENSANDO...";
+
+    const callbackName = 'cb_' + Date.now();
     window[callbackName] = function(data) {
-        renderResults(data);
+        document.getElementById('results').classList.remove('hidden');
+        document.getElementById('c-completo').innerHTML = data.completo;
+        document.getElementById('c-minimal').innerText = data.minimalista;
+        document.getElementById('c-slides').innerHTML = data.slides.map(s => 
+            `<div class="bg-indigo-900 text-white p-6 rounded-2xl text-center font-serif shadow-md border-b-4 border-indigo-400">${s}</div>`
+        ).join('');
+        btnRun.disabled = false;
+        btnRun.innerText = "GENERAR OTRO";
         delete window[callbackName];
-        const tag = document.getElementById('jsonp-tag');
-        if(tag) tag.remove();
+        document.getElementById('temp-script').remove();
     };
 
-    const scriptTag = document.createElement('script');
-    scriptTag.id = 'jsonp-tag';
-    scriptTag.src = `${SCRIPT_URL}?text=${encodeURIComponent(texto)}&callback=${callbackName}`;
-    document.body.appendChild(scriptTag);
-});
-
-function renderResults(data) {
-    document.getElementById('results-area').classList.remove('hidden');
-    document.getElementById('completo').innerHTML = data.completo;
-    document.getElementById('minimal').innerText = data.minimalista;
-    document.getElementById('slides').innerHTML = data.slides.map(s => 
-        `<div class="bg-indigo-900 text-white p-6 rounded-xl text-center font-serif shadow-lg border-b-4 border-indigo-400">${s}</div>`
-    ).join('');
-    btnProcess.disabled = false;
-    btnProcess.innerText = "NUEVO ANÁLISIS";
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    const script = document.createElement('script');
+    script.id = 'temp-script';
+    script.src = `${URL_SCRIPT}?text=${encodeURIComponent(texto)}&callback=${callbackName}`;
+    document.body.appendChild(script);
 }
 
-function switchTab(id) {
+// 5. Navegación de pestañas
+function tab(id) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab', 'text-indigo-600'));
-    document.getElementById(id).classList.add('active');
-    document.getElementById('tab-' + id).classList.add('active-tab', 'text-indigo-600');
+    document.querySelectorAll('[id^="t-"]').forEach(b => b.classList.remove('active-tab', 'text-indigo-600'));
+    document.getElementById('c-' + id).classList.add('active');
+    document.getElementById('t-' + id).classList.add('active-tab', 'text-indigo-600');
 }
