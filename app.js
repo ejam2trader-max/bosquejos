@@ -5,7 +5,6 @@ const btnCamera = document.getElementById('btn-camera');
 const btnUpload = document.getElementById('btn-upload');
 const btnProcess = document.getElementById('btn-process');
 const bibleInput = document.getElementById('bible-text-input');
-const canvas = document.getElementById('hidden-canvas');
 
 // 1. Manejo de Cámara y Archivos
 btnCamera.addEventListener('click', async () => {
@@ -15,7 +14,8 @@ btnCamera.addEventListener('click', async () => {
         video.classList.remove('hidden');
         imagePreview.classList.add('hidden');
         video.play();
-    } catch (err) { alert("Acceso a cámara denegado."); }
+        btnProcess.classList.remove('hidden');
+    } catch (err) { alert("Acceso a cámara denegado. Asegúrate de estar en HTTPS."); }
 });
 
 btnUpload.addEventListener('click', () => fileInput.click());
@@ -27,6 +27,7 @@ fileInput.addEventListener('change', e => {
             imagePreview.src = ex.target.result;
             imagePreview.classList.remove('hidden');
             video.classList.add('hidden');
+            btnProcess.classList.remove('hidden');
             ejecutarOCR(ex.target.result);
         };
         reader.readAsDataURL(file);
@@ -36,26 +37,31 @@ fileInput.addEventListener('change', e => {
 // 2. OCR (Reconocimiento de Texto)
 async function ejecutarOCR(source) {
     btnProcess.innerText = "LEYENDO IMAGEN...";
-    const { data: { text } } = await Tesseract.recognize(source, 'spa');
-    bibleInput.value = text.trim();
-    btnProcess.innerText = "GENERAR BOSQUEJO DE GRACIA";
+    try {
+        const { data: { text } } = await Tesseract.recognize(source, 'spa');
+        bibleInput.value = text.trim();
+        btnProcess.innerText = "GENERAR BOSQUEJO DE GRACIA";
+    } catch (err) { alert("Error al leer la imagen."); }
 }
 
 // 3. Envío al Servidor (MÉTODO JSONP - SIN ERRORES DE CORS)
 btnProcess.addEventListener('click', () => {
     const texto = bibleInput.value.trim();
-    if (texto.length < 5) return alert("Ingresa un texto válido.");
+    if (texto.length < 5) return alert("Por favor, ingresa o captura un texto bíblico.");
 
     btnProcess.disabled = true;
     btnProcess.innerText = "CONSULTANDO A GEMINI PRO...";
 
-    const SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI"; // <--- PEGA TU URL AQUÍ
+    // TU URL DE GOOGLE APPS SCRIPT
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTqHdc94RgVg800GOGFbWIskugICEXCh-D1MxJWGIdE5xK3Do1J0qyaR7oY8Z9nAyp0g/exec";
+    
     const callbackName = 'callback_' + Math.round(Math.random() * 1000000);
 
     window[callbackName] = function(data) {
         renderResults(data);
         delete window[callbackName];
-        document.getElementById('jsonp-tag').remove();
+        const tag = document.getElementById('jsonp-tag');
+        if(tag) tag.remove();
     };
 
     const scriptTag = document.createElement('script');
@@ -69,7 +75,7 @@ function renderResults(data) {
     document.getElementById('completo').innerHTML = data.completo;
     document.getElementById('minimal').innerText = data.minimalista;
     document.getElementById('slides').innerHTML = data.slides.map(s => 
-        `<div class="bg-slate-800 text-white p-6 rounded-xl text-center font-serif shadow-md border-b-4 border-indigo-500">${s}</div>`
+        `<div class="bg-indigo-900 text-white p-6 rounded-xl text-center font-serif shadow-lg border-b-4 border-indigo-400">${s}</div>`
     ).join('');
     btnProcess.disabled = false;
     btnProcess.innerText = "NUEVO ANÁLISIS";
