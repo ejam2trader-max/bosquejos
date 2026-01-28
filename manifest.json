@@ -1,11 +1,10 @@
 {
   "name": "Grace Scanner Pro",
-  "short_name": "GraceApp",
+  "short_name": "Grace",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#4f46e5",
-  "theme_color": "#4f46e5",
-  "description": "Escáner bíblico cristocéntrico",
+  "background_color": "#4338ca",
+  "theme_color": "#4338ca",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3004/3004416.png",
